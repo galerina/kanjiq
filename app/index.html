@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en" ng-app="kanjiApp">
+<head>
+  <meta charset="utf-8">
+  <title>Kanji Search</title>
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
+  <link rel="stylesheet" href="css/app.css">
+  <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script> -->
+  <script src="bower_components/angular/angular.js"></script>
+  <script src="js/controllers.js"></script>
+  <script src="js/filters.js"></script>
+</head>
+<body ng-controller="KanjiCtrl">
+
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-2">
+        <!--Sidebar content-->
+
+        Search: <input ng-model="query">
+      </div>
+      <div class="col-md-3">
+
+	<h3 ng-show="query && textFilteredKanjis.length">Text matches ({{textFilteredKanjis.length}})</h3>
+        <table class="kanji">
+          <tr ng-repeat="kanji in (textFilteredKanjis = (kanjis | kanjiTextSearch:query | orderBy:orderProp))" class="thumbnail">
+            <td>{{ kanji.kanji }}</td><td>{{ kanji.meaning }}</td>
+          </tr>
+        </table>
+      </div>
+      <div class="col-md-3">
+	<h3 ng-show="query && radFilteredKanjis.length">Radical matches ({{query}} - {{radFilteredKanjis.length}})</h3>
+        <table class="kanji">
+          <tr ng-repeat="kanji in (radFilteredKanjis = (kanjis | kanjiRadSearch:query | orderBy:orderProp))" class="thumbnail">
+            <td>{{ kanji.kanji }}</td><td>{{ kanji.meaning }}</td>
+          </tr>
+        </table>
+
+
+
+      </div>
+    </div>
+  </div>
+</body>
+</html>
