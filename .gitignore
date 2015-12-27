@@ -7,4 +7,5 @@ tmp
 .idea
 *~
 \#*
+.\#*
 .#package.json
