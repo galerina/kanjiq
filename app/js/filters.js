@@ -1,5 +1,6 @@
 var filtersMod = angular.module('kanjiFilters', []).constant('_', window._);
 
+var wordSepChar = "+";
 var tokenize = function(query) {
     var tokenRE = /(?:([^"'\s]+)\s*)|(?:"([^"']+)"\s*)|(?:'([^"']+)'\s*)/g;
 
@@ -14,7 +15,11 @@ var tokenize = function(query) {
         lastIndex = tokenRE.lastIndex;
     }
     return meaningsMatch;
-}
+};
+
+var isWordQuery = function(query) {
+    return query.includes(wordSepChar);
+};
 
 var multiStringRegex = function(strList) {
     var s = strList.map(function(q) {
@@ -59,7 +64,7 @@ var radicalMatch = function(elem, query) {
 filtersMod.filter('kanjiTextSearch', function() {
     return function(input, query) {
         var out = [];
-        if (input) {
+        if (input && query && !isWordQuery(query)) {
             input.forEach(function(elem) {
                 if (kanjiTextMatch(elem, query)) {
                     out.push(elem);
@@ -68,13 +73,13 @@ filtersMod.filter('kanjiTextSearch', function() {
         }
 
         return out;
-    }
+    };
 });
 
 filtersMod.filter('kanjiRadSearch', function() {
     return function(input, query) {
         var out = [];
-        if (input) {
+        if (input && query && !isWordQuery(query)) {
             input.forEach(function(elem) {
                 if (!kanjiTextMatch(elem, query) && radicalMatch(elem, query)) {
                     out.push(elem);
@@ -83,5 +88,75 @@ filtersMod.filter('kanjiRadSearch', function() {
         }
 
         return out;
+    };
+});
+
+
+var possibleStrings = function(parts) {
+    var combinations = parts[0];
+    for (var i = 1; i < parts.length; i++) {
+        var newCombinations = [];
+        var currentPart = parts[i];
+        combinations.forEach(function(c) {
+            currentPart.forEach(function(e) {
+                newCombinations.push(c + e);
+            });
+        });
+
+        combinations = newCombinations;
     }
+
+    return combinations;
+};
+
+var lookup = function(strings, prefixes) {
+    var exactMatches = [];
+    var matches = [];
+    prefixes.forEach(function(pre) {
+        var index = _.sortedIndex(strings, pre);
+        console.log(index);
+        while (strings[index].indexOf(pre) == 0) {
+            if (strings[index].length == pre.length) {
+                exactMatches.push(strings[index]);
+            } else {
+                matches.push(strings[index]);
+            }
+
+            index++;
+        }
+    });
+
+    return exactMatches.concat(matches);
+};
+
+var isJapaneseText = function(s) {
+    var japaneseRE = /^[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]+$/;
+    //                  -------------_____________-------------_____________-------------_____________
+    //                  Punctuation   Hiragana     Katakana    Full-width       CJK      CJK Ext. A
+    //                                                           Roman/      (Common &      (Rare)
+    //                                                         Half-width    Uncommon)
+    //                                                          Katakana
+    return japaneseRE.exec(s.trim());
+}
+
+filtersMod.filter('wordSearch', function(kanjiTextSearchFilter) {
+    return function(input, kanjiDic, query) {
+        var out = [];
+        if (input && query && isWordQuery(query)) {
+            var parts = query.split(wordSepChar).map(function(e) {
+                if (isJapaneseText(e)) {
+                    return [e];
+                } else {
+                    return kanjiTextSearchFilter(kanjiDic, e).map(function(kanji) {
+                        return kanji["kanji"];
+                    });
+                }
+            });
+
+            var prefixes = possibleStrings(parts).sort();
+            return lookup(input, prefixes);
+        }
+
+        return [];
+    };
 });

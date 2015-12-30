@@ -4,8 +4,12 @@
 var kanjiApp = angular.module('kanjiApp', ['kanjiFilters']);
 
 kanjiApp.controller('KanjiCtrl', ['$scope', '$http', function($scope, $http) {
-  $http.get('kanji/kanji2500.json').success(function(data) {
+  $http.get('data/kanji2500.json').success(function(data) {
     $scope.kanjis = data;
+  });
+
+  $http.get('data/jwords.json').success(function(data) {
+    $scope.dictionary = data;
   });
 
   $scope.orderProp = 'frequencyRank';
