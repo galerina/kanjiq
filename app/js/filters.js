@@ -1,6 +1,10 @@
-var filtersMod = angular.module('kanjiFilters', []).constant('_', window._);
-
+var filtersMod = angular.module('kanjiFilters', []);
 var wordSepChar = "+";
+
+RegExp.escape = function(text) {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#]/g, "\\$&");
+};
+
 var tokenize = function(query) {
     var tokenRE = /(?:([^"'\s]+)\s*)|(?:"([^"']+)"\s*)|(?:'([^"']+)'\s*)/g;
 
@@ -38,7 +42,6 @@ var matchInList = function(list, query) {
 };
 
 var matchQueryList = function(terms, queryList) {
-    // TODO: Use lodash here
     if (queryList.length == 0 || terms.length == 0) {
         return false;
     }
@@ -56,15 +59,47 @@ var kanjiTextMatch = function(elem, query) {
     return elem["kanji"].match(query) || elem["meaning"].match(query) || matchInList(elem["alternateMeanings"], tokenize(query));
 };
 
-var radicalMatch = function(elem, query) {
-    var retVal = null;
-    return matchQueryList(elem["radicals"], tokenize(query)) || matchQueryList(elem["radicalMeanings"], tokenize(query));
+var radicalMatch = function(elem, queries) {
+    var radicalMatchList = elem["radicals"].concat(elem["radicalMeanings"]);
+    for (var i = 0; i < queries.length; i++) {
+        if (matchQueryList(radicalMatchList, tokenize(queries[i]))) {
+            return true;
+        }
+    }
+    return false;
 };
+
+var generateRadicalQueries = function(kanjiList, query) {
+    var tokens = tokenize(query);
+    parts = [];
+    tokens.forEach(function(token) {
+        console.log("Token = " + token);
+        var radicalStrings = [" "+token].concat(kanjiList.filter(function(kanji) {
+            return kanji["meaning"] == token;
+        }).map(function(kanji) {
+            return " " + kanji["radicals"].join(" ");
+        }));
+
+        parts.push(radicalStrings);
+    });
+
+    console.log(parts);
+
+    return possibleStrings(parts);
+};
+
 
 filtersMod.filter('kanjiTextSearch', function() {
     return function(input, query) {
         var out = [];
-        if (input && query && !isWordQuery(query)) {
+
+        if (query && isWordQuery(query)) {
+            var parts = query.split(wordSepChar);
+            query = parts[parts.length - 1];
+        }
+
+        if (input && query) {
+            query = RegExp.escape(query);
             input.forEach(function(elem) {
                 if (kanjiTextMatch(elem, query)) {
                     out.push(elem);
@@ -79,9 +114,18 @@ filtersMod.filter('kanjiTextSearch', function() {
 filtersMod.filter('kanjiRadSearch', function() {
     return function(input, query) {
         var out = [];
-        if (input && query && !isWordQuery(query)) {
+
+        if (query && isWordQuery(query)) {
+            var parts = query.split(wordSepChar);
+            query = parts[parts.length - 1];
+        }
+
+        if (input && query) {
+            query = RegExp.escape(query);
+            var expandedQueries = generateRadicalQueries(input, query);
+            console.log(expandedQueries);
             input.forEach(function(elem) {
-                if (!kanjiTextMatch(elem, query) && radicalMatch(elem, query)) {
+                if (!kanjiTextMatch(elem, query) && radicalMatch(elem, expandedQueries)) {
                     out.push(elem);
                 }
             });
@@ -93,6 +137,10 @@ filtersMod.filter('kanjiRadSearch', function() {
 
 
 var possibleStrings = function(parts) {
+    if (_.isEmpty(parts)) {
+        return [];
+    }
+
     var combinations = parts[0];
     for (var i = 1; i < parts.length; i++) {
         var newCombinations = [];
@@ -114,7 +162,6 @@ var lookup = function(strings, prefixes) {
     var matches = [];
     prefixes.forEach(function(pre) {
         var index = _.sortedIndex(strings, pre);
-        console.log(index);
         while (strings[index].indexOf(pre) == 0) {
             if (strings[index].length == pre.length) {
                 exactMatches.push(strings[index]);
@@ -126,7 +173,7 @@ var lookup = function(strings, prefixes) {
         }
     });
 
-    return exactMatches.concat(matches);
+    return _.unique(exactMatches.concat(matches));
 };
 
 var isJapaneseText = function(s) {
@@ -139,19 +186,31 @@ var isJapaneseText = function(s) {
     return japaneseRE.exec(s.trim());
 }
 
-filtersMod.filter('wordSearch', function(kanjiTextSearchFilter) {
+filtersMod.filter('wordSearch', function(kanjiTextSearchFilter, kanjiRadSearchFilter) {
     return function(input, kanjiDic, query) {
         var out = [];
         if (input && query && isWordQuery(query)) {
+            if (query[0] == wordSepChar) {
+                query = query.slice(1);
+            }
+
             var parts = query.split(wordSepChar).map(function(e) {
+                e = RegExp.escape(e.trim());
                 if (isJapaneseText(e)) {
                     return [e];
                 } else {
-                    return kanjiTextSearchFilter(kanjiDic, e).map(function(kanji) {
+                    return _.uniq(kanjiTextSearchFilter(kanjiDic, e).map(function(kanji) {
                         return kanji["kanji"];
-                    });
+                    }));
                 }
             });
+
+            var PARTS_THRESHOLD_LENGTH = 500;
+            for(var i = 0; i < parts.length; i++) {
+                if (parts[i].length > PARTS_THRESHOLD_LENGTH) {
+                    return [];
+                }
+            }
 
             var prefixes = possibleStrings(parts).sort();
             return lookup(input, prefixes);

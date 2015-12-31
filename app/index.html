@@ -33,8 +33,7 @@
             </table>
         </div>
         <div class="col-md-3">
-            <h3 ng-show="query && radFilteredKanjis.length">Radical matches ({{query}} -
-                {{radFilteredKanjis.length}})</h3>
+            <h3 ng-show="query && radFilteredKanjis.length">Radical matches ({{radFilteredKanjis.length}})</h3>
             <table class="kanji">
                 <tr ng-repeat="kanji in (radFilteredKanjis = (kanjis | kanjiRadSearch:query | orderBy:orderProp))"
                     class="thumbnail">
