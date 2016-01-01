@@ -1,4 +1,16 @@
 describe("Filters test", function() {
+    describe("Test filter function", function() {
+        describe("Test kanji text search filter", function() {
+
+        });
+
+        describe("Test kanji radical search filter", function() {
+        });
+
+        describe("Test kanji word search filter", function() {
+        });
+    });
+
     describe("Test tokenize", function() {
       it("tokenizes a query string containing double quotes into search terms", function() {
         var tokens = tokenize('"stand up" "mouth"');

@@ -12,5 +12,6 @@ kanjiApp.controller('KanjiCtrl', ['$scope', '$http', function($scope, $http) {
     $scope.dictionary = data;
   });
 
+  $scope.saved = [];
   $scope.orderProp = 'frequencyRank';
 }]);
