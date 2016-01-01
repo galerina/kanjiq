@@ -26,7 +26,7 @@
                 <h3 >Saved ({{saved.length}})</h3>
                 </thead>
                 <tr ng-repeat="e in saved"
-                    ng-click="saved = _.without(saved,e)">
+                    ng-click="saved.splice(saved.indexOf(e), 1)">
                     <td>{{ e }}</td>
                 </tr>
             </table>
