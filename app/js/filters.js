@@ -29,13 +29,14 @@ var multiStringRegex = function(strList) {
     var s = strList.map(function(q) {
                         return '(?:^' + q + '$)';
                     }).join('|');
+
     return new RegExp(s);
 };
 
 var matchInList = function(list, query) {
     var retVal = null;
     list.forEach(function(elem) {
-	    retVal = (retVal || elem.match(query));
+	    retVal = (retVal || elem.test(query));
     });
 
     return retVal;
@@ -47,7 +48,7 @@ var matchQueryList = function(terms, queryList) {
     }
 
     var retVal = true;
-    re = multiStringRegex(terms);
+    var re = multiStringRegex(terms);
     queryList.forEach(function(elem) {
 	    retVal = (retVal && elem.match(re));
     });
@@ -56,7 +57,7 @@ var matchQueryList = function(terms, queryList) {
 };
 
 var kanjiTextMatch = function(elem, query) {
-    return elem["kanji"].match(query) || elem["meaning"].match(query) || matchInList(elem["alternateMeanings"], tokenize(query));
+    return elem["kanji"].match(query) || matchQueryList(elem["meanings"], tokenize(query));
 };
 
 var radicalMatch = function(elem, queries) {
@@ -73,17 +74,14 @@ var generateRadicalQueries = function(kanjiList, query) {
     var tokens = tokenize(query);
     parts = [];
     tokens.forEach(function(token) {
-        console.log("Token = " + token);
-        var radicalStrings = [" "+token].concat(kanjiList.filter(function(kanji) {
-            return kanji["meaning"] == token;
+        var radicalStrings = [' "'+token+'"'].concat(kanjiList.filter(function(kanji) {
+            return kanji["meanings"][0] == token;
         }).map(function(kanji) {
             return " " + kanji["radicals"].join(" ");
         }));
 
         parts.push(radicalStrings);
     });
-
-    console.log(parts);
 
     return possibleStrings(parts);
 };
@@ -100,7 +98,8 @@ filtersMod.filter('kanjiTextSearch', function() {
 
         if (input && query) {
             query = RegExp.escape(query);
-            input.forEach(function(elem) {
+            input.forEach(function(elem, index) {
+                if (!elem) { console.log(index); }
                 if (kanjiTextMatch(elem, query)) {
                     out.push(elem);
                 }
@@ -122,8 +121,8 @@ filtersMod.filter('kanjiRadSearch', function() {
 
         if (input && query) {
             query = RegExp.escape(query);
+            console.log(query);
             var expandedQueries = generateRadicalQueries(input, query);
-            console.log(expandedQueries);
             input.forEach(function(elem) {
                 if (!kanjiTextMatch(elem, query) && radicalMatch(elem, expandedQueries)) {
                     out.push(elem);

@@ -2,41 +2,43 @@
 
 /* https://github.com/angular/protractor/blob/master/docs/toc.md */
 
-describe('my app', function() {
+describe('Kanjiq', function() {
+
+  describe('word search functionality', function() {
+    beforeEach(function() {
+      browser.get('index.html');
+    });
 
 
-  it('should automatically redirect to /view1 when location hash/fragment is empty', function() {
-    browser.get('index.html');
-    expect(browser.getLocationAbsUrl()).toMatch("/view1");
+    it('should show 日本 when I search for "sun + book" ', function() {
+      element(by.model('query')).clear().sendKeys('sun + book');
+
+      element(by.repeater('word in').row(0).column('word')).getText().then(function(text) {
+        expect(text.includes('日本')).toBe(true);
+      });
+    });
   });
 
+  describe('kanji search functions', function() {
+    it('should show 性 when I search for ["state of mind" life]', function() {
+      element(by.model('query')).clear().sendKeys('"state of mind" life');
 
-  describe('view1', function() {
-
-    beforeEach(function() {
-      browser.get('index.html#/view1');
+      element(by.repeater('kanji in').row(0).column('kanji.kanji')).getText().then(function(text) {
+        expect(text.includes('性')).toBe(true);
+      });
     });
 
+    it('should show 受 and 授 when I search for "accept"', function() {
+      element(by.model('query')).clear().sendKeys('accept');
 
-    it('should render view1 when user navigates to /view1', function() {
-      expect(element.all(by.css('[ng-view] p')).first().getText()).
-        toMatch(/partial for view 1/);
+      element(by.repeater('kanji in').row(0).column('kanji.kanji')).getText().then(function(text) {
+        expect(text.includes('受')).toBe(true);
+        expect(text.includes('授')).toBe(true);
+      });
     });
-
   });
 
-
-  describe('view2', function() {
-
-    beforeEach(function() {
-      browser.get('index.html#/view2');
-    });
-
-
-    it('should render view2 when user navigates to /view2', function() {
-      expect(element.all(by.css('[ng-view] p')).first().getText()).
-        toMatch(/partial for view 2/);
-    });
-
+  describe('saving functions', function() {
+    // TODO
   });
 });
