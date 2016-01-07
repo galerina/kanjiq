@@ -24,7 +24,7 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
         var sequences = [[]];
 
         arrays.forEach(function(array) {
-            console.log(array);
+            // console.log(array);
             var newSequences = [];
             array.forEach(function(elem) {
                 sequences.forEach(function(sequence) {
@@ -135,7 +135,7 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
             var results = [];
 
             generateAllQueries(query).forEach(function(q) {
-                console.log(q);
+                // console.log(q);
                 var newResults = unionOfSortedArrays(tokenize(q).map(function(token) {
                     return kanjiLookup['radicalTable'][token] || kanjiLookup['meaningTable'][token] || [];
                 }));
@@ -146,11 +146,7 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
         },
 
         findWords: function(query) {
-            if (isJapaneseText(query)) {
-                var apiUrl = 'http://jisho.org/api/v1/search/words?keyword=' + query;
-                $http.get(apiUrl).success(function(data) {
-
-                );
+            return [];
         },
 
         onReady: function(fn) {
