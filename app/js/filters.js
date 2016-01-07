@@ -1,4 +1,4 @@
-var filtersMod = angular.module('kanjiFilters', []);
+/* var filtersMod = angular.module('kanjiFilters', []);
 var wordSepChar = "+";
 
 RegExp.escape = function(text) {
@@ -70,15 +70,15 @@ var radicalMatch = function(elem, queries) {
     return false;
 };
 
-var generateRadicalQueries = function(kanjiList, query) {
+var generateRadicalQueries = function(kanjiList, query, index) {
     var tokens = tokenize(query);
     parts = [];
     tokens.forEach(function(token) {
-        var radicalStrings = [' "'+token+'"'].concat(kanjiList.filter(function(kanji) {
-            return kanji["meanings"][0] == token;
-        }).map(function(kanji) {
-            return " " + kanji["radicals"].join(" ");
-        }));
+        var radicalStrings = [' "'+token+'"'].concat(
+            index[token].map(function(kanji) {
+                kanji.radical.join(" ");
+            });
+        );
 
         parts.push(radicalStrings);
     });
@@ -110,8 +110,26 @@ filtersMod.filter('kanjiTextSearch', function() {
     };
 });
 
+var unionOfSortedArrays(...arrays) {
+    var cursors = [];
+    for (var i = 0; i < arrays.length; i++) {
+        cursors.push(0);
+    }
+
+    var out = [];
+
+
+    return out;
+}
+
+var getMatches = function(kanjiDic, query, index) {
+    return unionOfSortedArrays(tokenize(query).map(function(token) {
+        return index[token];
+    }));
+}
+
 filtersMod.filter('kanjiRadSearch', function() {
-    return function(input, query) {
+    return function(input, query, index) {
         var out = [];
 
         if (query && isWordQuery(query)) {
@@ -123,11 +141,10 @@ filtersMod.filter('kanjiRadSearch', function() {
             query = RegExp.escape(query);
             console.log(query);
             var expandedQueries = generateRadicalQueries(input, query);
-            input.forEach(function(elem) {
-                if (!kanjiTextMatch(elem, query) && radicalMatch(elem, expandedQueries)) {
-                    out.push(elem);
-                }
-            });
+
+            expandedQueries.forEach(function(q) {
+                out.concat(getMatches(input, q, index));
+            }
         }
 
         return out;
@@ -218,3 +235,5 @@ filtersMod.filter('wordSearch', function(kanjiTextSearchFilter, kanjiRadSearchFi
         return [];
     };
 });
+
+*/

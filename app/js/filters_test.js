@@ -1,3 +1,4 @@
+/*
 describe("Filters test", function() {
     describe("Test filter function", function() {
         describe("Test kanji text search filter", function() {
@@ -85,4 +86,11 @@ describe("Filters test", function() {
             expect(isJapaneseText("AAAPPひらがな")).toBeFalsy();
         });
     });
+
+    describe("Test union of sorted arrays", function() {
+        it ("Returns an empty array for zero arguments", function() {
+            expect(unionOfSortedArrays()).toBe
+        })
+    })
 });
+*/

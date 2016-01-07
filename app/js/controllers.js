@@ -1,17 +1,15 @@
 'use strict';
 
-// var kanjiApp = angular.module('myApp', []);
-var kanjiApp = angular.module('kanjiApp', ['kanjiFilters']);
+var kanjiApp = angular.module('kanjiApp', []);
 
-kanjiApp.controller('KanjiCtrl', ['$scope', '$http', function($scope, $http) {
-  $http.get('data/kanjinew.json').success(function(data) {
-    $scope.kanjis = data;
-  });
-
-  $http.get('data/jwords.json~').success(function(data) {
-    $scope.dictionary = data;
-  });
-
+kanjiApp.controller('KanjiCtrl', ['$scope', 'search', function($scope, search) {
   $scope.saved = [];
-  $scope.orderProp = 'frequencyRank';
+  $scope.findKanji = search.findKanji;
+  $scope.findWords = search.findWords;
+
+  $scope.searchDisabled = true;
+  search.onReady(function() {
+      console.log("Enabling search");
+      $scope.searchDisabled = false;
+  });
 }]);

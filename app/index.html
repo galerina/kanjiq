@@ -10,7 +10,9 @@
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/lodash/lodash.min.js"></script>
     <script src="js/controllers.js"></script>
-    <script src="js/filters.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/kanjiDictionary.js"></script>
+    <!--<script src="js/filters.js"></script>-->
 </head>
 <body ng-controller="KanjiCtrl">
 
@@ -19,7 +21,7 @@
         <div class="col-md-2">
             <!--Sidebar content-->
 
-            Search: <input ng-model="query" ng-model-options="{ debounce: 250 }">
+            Search: <input ng-model="query" ng-model-options="{ debounce: 250 }" ng-disabled="searchDisabled">
 
             <table class="kanji table table-hover">
                 <thead>
@@ -31,33 +33,24 @@
                 </tr>
             </table>
         </div>
-        <div class="col-md-3" ng-show="query && textFilteredKanjis.length">
-            <h3 >Text matches ({{textFilteredKanjis.length}})</h3>
-            <table class="kanji table table-hover">
-                <tr ng-repeat="kanji in (textFilteredKanjis = (kanjis | kanjiTextSearch:query | orderBy:orderProp))"
-                    ng-click="saved.push(kanji.kanji)">
-                    <td>{{kanji.kanji}}</td>
-                    <td>{{kanji.meanings[0]}}</td>
-                </tr>
-            </table>
-        </div>
-        <div class="col-md-3"  ng-show="query && radFilteredKanjis.length">
+        <div class="col-md-3"  ng-show="query && kanjiResults.length">
             <table class="kanji table table-hover">
                 <thead>
-                    <h3 >Radical matches ({{radFilteredKanjis.length}})</h3>
+                    <h3 >Radical matches ({{kanjiResults.length}})</h3>
                 </thead>
-                <tr ng-repeat="kanji in (radFilteredKanjis = (kanjis | kanjiRadSearch:query | orderBy:orderProp))"
-                    ng-click="saved.push(kanji.kanji)">
-                    <td>{{ kanji.kanji }}</td>
-                    <td>{{ kanji.meanings[0] }}</td>
+                <tr ng-repeat="kanji in (kanjiResults = findKanji(query))"
+                    ng-click="saved.push(kanji)">
+                    <td>{{ kanji }}</td>
                 </tr>
             </table>
         </div>
-        <div class="col-md-3">
-            <h3 ng-show="query && filteredWords.length">Word matches ({{query}} -
-                {{filteredWords.length}})</h3>
-            <table class="kanji">
-                <tr ng-repeat="word in (filteredWords = (dictionary | wordSearch: kanjis:query))"
+        <div class="col-md-3"  ng-show="query && wordResults.length">
+            <table class="kanji table table-hover">
+            <thead>
+                <h3>Word matches ({{query}} -
+                    {{filteredWords.length}})</h3>
+            </thead>
+                <tr ng-repeat="word in (wordResults = findWords(query))"
                     ng-click="saved.push(word)">
                     <td>{{ word }}</td>
                 </tr>
