@@ -116,6 +116,16 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
         return out;
     };
 
+    var isJapaneseText = function(s) {
+        var japaneseRE = /^[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]+$/;
+        //                  -------------_____________-------------_____________-------------_____________
+        //                  Punctuation   Hiragana     Katakana    Full-width       CJK      CJK Ext. A
+        //                                                           Roman/      (Common &      (Rare)
+        //                                                         Half-width    Uncommon)
+        //                                                          Katakana
+        return japaneseRE.exec(s.trim());
+    };
+
     return {
         findKanji: function(query) {
             if (_.isEmpty(query)) {
@@ -127,7 +137,7 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
             generateAllQueries(query).forEach(function(q) {
                 console.log(q);
                 var newResults = unionOfSortedArrays(tokenize(q).map(function(token) {
-                    return kanjiLookup['radicalTable'][token] || kanjiLookup['meaningTable'][token];
+                    return kanjiLookup['radicalTable'][token] || kanjiLookup['meaningTable'][token] || [];
                 }));
                 Array.prototype.push.apply(results, newResults);
             });
@@ -136,11 +146,11 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', functi
         },
 
         findWords: function(query) {
-            if (!_.isEmpty(query)) {
-                return ['日本'];
-            } else {
-                return [];
-            }
+            if (isJapaneseText(query)) {
+                var apiUrl = 'http://jisho.org/api/v1/search/words?keyword=' + query;
+                $http.get(apiUrl).success(function(data) {
+
+                );
         },
 
         onReady: function(fn) {
