@@ -1,22 +1,51 @@
-angular.module('kanjiApp').factory('wordDictionary', ['$http', function($http) {
+angular.module('kanjiApp').factory('wordDictionary', ['$http', 'textUtil', function($http, textUtil) {
     var words;
 
     $http.get('data/jwords.json').success(function(data) {
         words = data;
     });
 
-    return {
-        getWordsMatchingPrefix : function(prefix) {
-            var matches = [];
-            var index = _.sortedIndex(words, prefix);
-            console.log(words[index]);
-            while (words[index].indexOf(prefix) == 0) {
-                matches.push(words[index])
-                index++;
-            }
+    var getJishoResults = function(s, callback) {
+        var apiURL = 'http://jisho.org/api/v1/search/words?keyword=' + s;
 
-            // Why are there dups in our dictionary?
-            return _.uniq(matches);
+        $http.get(apiURL).success(function(data) {
+            var results = [];
+            data["data"].map(function(wordData) {
+                var firstWordInstance = wordData["japanese"][0];
+                if (_.has(firstWordInstance, "word")) {
+                    results.push(firstWordInstance["word"]);
+                } else {
+                    results.push(firstWordInstance["reading"]);
+                }
+            });
+
+            callback(results);
+        }).error(function() {
+            callback([]);
+        });
+    };
+
+    return {
+        wordsMatchingPrefix :
+        function(prefix) {
+            return {
+            then : function(callback) {
+                if (textUtil.isKanaText(prefix)) {
+                    getJishoResults(prefix, callback);
+                    return;
+                }
+
+                var matches = [];
+                var index = _.sortedIndex(words, prefix);
+                while (words[index].indexOf(prefix) == 0) {
+                    matches.push(words[index])
+                    index++;
+                }
+
+                // Why are there dups in our dictionary?
+                    callback(_.uniq(matches));
+                }
+            }
         },
     };
 }]);

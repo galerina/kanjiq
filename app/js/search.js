@@ -1,5 +1,5 @@
-angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', 'wordDictionary',
-                                    function($http, kanjiDictionary, wordDictionary) {
+angular.module('kanjiApp').factory('search', ['$http', '$q', 'kanjiDictionary', 'wordDictionary', 'textUtil',
+                                    function($http, $q, kanjiDictionary, wordDictionary, textUtil) {
     var kanjiLookup,kanjiFeatures;
 
     $http.get('data/kanjiLookup.json').success(function(data) {
@@ -18,7 +18,6 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', 'wordD
         var sequences = [[]];
 
         arrays.forEach(function(array) {
-            // console.log(array);
             var newSequences = [];
             array.forEach(function(elem) {
                 sequences.forEach(function(sequence) {
@@ -43,7 +42,7 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', 'wordD
                 kanjiLookup["meaningTable"][token].forEach(function(kanji) {
                     possibilities.push(kanjiDictionary.getRadicals(kanji));
                 });
-            } else if (isKanji(token)) {
+            } else if (textUtil.isKanji(token)) {
                 var radicals = kanjiDictionary.getRadicals(token);
                 if (radicals.length > 1) {
                     possibilities.push(radicals);
@@ -113,66 +112,63 @@ angular.module('kanjiApp').factory('search', ['$http', 'kanjiDictionary', 'wordD
         return out;
     };
 
-    var isJapaneseText = function(s) {
-        var japaneseRE = /^[\u3000-\u303f\u3040-\u309f\u30a0-\u30ff\uff00-\uff9f\u4e00-\u9faf\u3400-\u4dbf]+$/;
-        //                  -------------_____________-------------_____________-------------_____________
-        //                  Punctuation   Hiragana     Katakana    Full-width       CJK      CJK Ext. A
-        //                                                           Roman/      (Common &      (Rare)
-        //                                                         Half-width    Uncommon)
-        //                                                          Katakana
-        return japaneseRE.exec(s.trim());
-    };
-    
-    var isKanji = function(s) {
-        var kanjiRE = /^[\u4e00-\u9faf\u3400-\u4dbf]$/;
-        //                  -------------_____________-------------_____________-------------_____________
-        //                  Punctuation   Hiragana     Katakana    Full-width       CJK      CJK Ext. A
-        //                                                           Roman/      (Common &      (Rare)
-        //                                                         Half-width    Uncommon)
-        //                                                          Katakana
-        return kanjiRE.exec(s);
-    }
 
     var obj = {};
     obj.findKanji = function(query) {
-        if (_.isEmpty(query)) {
-            return [];
+        var promise = {};
+        promise.then = function(callback) {
+            if (_.isEmpty(query)) {
+                return callback([]);
+            }
+
+            var results = [];
+
+            generateAllQueryArrays(query).forEach(function(q) {
+                var newResults = unionOfSortedArrays(q.map(function(token) {
+                    return kanjiLookup['radicalTable'][token] || kanjiLookup['meaningTable'][token] || [];
+                }));
+                Array.prototype.push.apply(results, newResults);
+            });
+
+            return callback(_.uniq(results));
         }
 
-        var results = [];
-
-        generateAllQueryArrays(query).forEach(function(q) {
-            var newResults = unionOfSortedArrays(q.map(function(token) {
-                return kanjiLookup['radicalTable'][token] || kanjiLookup['meaningTable'][token] || [];
-            }));
-            Array.prototype.push.apply(results, newResults);
-        });
-
-        return _.uniq(results);
+        return promise;
     };
 
     obj.findWords = function(query) {
-        if (_.isEmpty(query)) {
-            return [];
-        }
-
-        var queryParts = query.split("+").map(function(queryPart) {
-            if (isJapaneseText(queryPart)) {
-                return [queryPart];
-            } else {
-                return obj.findKanji(queryPart);
+        var promise = {};
+        promise.then = function(callback) {
+            if (_.isEmpty(query)) {
+                return callback([]);
             }
-        });
 
-        console.log(queryParts);
+            var kanjiPromises = query.split("+").map(function(queryPart) {
+                if (textUtil.isJapaneseText(queryPart)) {
+                    return {
+                        then: function(callback) {
+                            callback([queryPart]);
+                        }
+                    }
+                } else {
+                    return obj.findKanji(queryPart);
+                }
+            });
 
-        var results = [];
-        generateAllSequences(queryParts).forEach(function(sequence) {
-            var prefix = sequence.join("");
-            Array.prototype.push.apply(results, wordDictionary.getWordsMatchingPrefix(prefix));
-        });
+            $q.all(kanjiPromises).then(function(queryParts) {
+                var results = [];
+                var wordPromises = [];
+                generateAllSequences(queryParts).forEach(function(sequence) {
+                    var prefix = sequence.join("");
+                    wordPromises.push(wordDictionary.wordsMatchingPrefix(prefix));
+                });
 
-        return results;
+                $q.all(wordPromises).then(function(words) {
+                    callback(_.uniq(_.flatten(words)).sort());
+                });
+            });
+        };
+        return promise
     };
 
     obj.onReady = function(fn) {

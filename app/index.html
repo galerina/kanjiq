@@ -13,6 +13,7 @@
     <script src="js/search.js"></script>
     <script src="js/kanjiDictionary.js"></script>
     <script src="js/wordDictionary.js"></script>
+    <script src="js/textUtil.js"></script>
     <!--<script src="js/filters.js"></script>-->
 </head>
 <body ng-controller="KanjiCtrl">
@@ -22,7 +23,8 @@
         <div class="col-md-2">
             <!--Sidebar content-->
 
-            Search: <input ng-model="query" ng-model-options="{ debounce: 250 }" ng-disabled="searchDisabled">
+            Search: <input ng-model="query" ng-change="updateSearchResults(query)" ng-model-options="{ debounce: 250 }"
+                           ng-disabled="searchDisabled">
 
             <table class="kanji table table-hover">
                 <thead>
@@ -34,25 +36,25 @@
                 </tr>
             </table>
         </div>
-        <div class="col-md-3"  ng-show="query && kanjiResults.length">
+        <div class="col-md-3"  ng-show="query && kanjiSearchResults.length">
             <table class="kanji table table-hover">
                 <thead>
-                    <h3 >Radical matches ({{kanjiResults.length}})</h3>
+                    <h3 >Radical matches ({{kanjiSearchResults.length}})</h3>
                 </thead>
-                <tr ng-repeat="kanji in (kanjiResults = findKanji(query))"
+                <tr ng-repeat="kanji in kanjiSearchResults"
                     ng-click="query = saved.push(kanji)">
                     <td>{{ kanji }}</td>
-                    <td>{{ getKanjiMeaning(kanji) }}</td>
+                    <!-- <td>{{ getKanjiMeaning(kanji) }}</td> -->
                 </tr>
             </table>
         </div>
-        <div class="col-md-3"  ng-show="query && wordResults.length">
+        <div class="col-md-3"  ng-show="query && wordSearchResults.length">
             <table class="kanji table table-hover">
             <thead>
                 <h3>Word matches ({{query}} -
-                    {{wordResults.length}})</h3>
+                    {{wordSearchResults.length}})</h3>
             </thead>
-                <tr ng-repeat="word in (wordResults = findWords(query))"
+                <tr ng-repeat="word in wordSearchResults"
                     ng-click="saved.push(word)">
                     <td>{{ word }}</td>
                 </tr>
