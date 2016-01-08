@@ -12,6 +12,7 @@
     <script src="js/controllers.js"></script>
     <script src="js/search.js"></script>
     <script src="js/kanjiDictionary.js"></script>
+    <script src="js/wordDictionary.js"></script>
     <!--<script src="js/filters.js"></script>-->
 </head>
 <body ng-controller="KanjiCtrl">
@@ -41,6 +42,7 @@
                 <tr ng-repeat="kanji in (kanjiResults = findKanji(query))"
                     ng-click="query = saved.push(kanji)">
                     <td>{{ kanji }}</td>
+                    <td>{{ getKanjiMeaning(kanji) }}</td>
                 </tr>
             </table>
         </div>
@@ -48,7 +50,7 @@
             <table class="kanji table table-hover">
             <thead>
                 <h3>Word matches ({{query}} -
-                    {{filteredWords.length}})</h3>
+                    {{wordResults.length}})</h3>
             </thead>
                 <tr ng-repeat="word in (wordResults = findWords(query))"
                     ng-click="saved.push(word)">

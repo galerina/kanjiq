@@ -17,12 +17,12 @@ describe('Kanjiq', function() {
       browser.get('index.html');
     });
 
-    it('should show 日本 when I search for "sun + book" ', function() {
-      element(by.model('query')).clear().sendKeys('sun + book');
+    it('should show 激しい when I search for "violent+し" ', function() {
+      element(by.model('query')).clear().sendKeys('violent+し');
 
       var words = getTextArrayForLocator(by.repeater('word in').column('word'));
 
-      expect(words).toContain('日本');
+      expect(words).toContain('激しい');
     });
   });
 
@@ -51,6 +51,16 @@ describe('Kanjiq', function() {
       expect(kanji).toContain('濃');
       expect(kanji).toContain('農');
     });
+
+    it('should show 本 and 体 when I search for "本"', function() {
+      element(by.model('query')).clear().sendKeys('本');
+      var kanji = getTextArrayForLocator(by.repeater('kanji in').column('kanji'));
+
+      expect(kanji).toContain('本');
+      expect(kanji).toContain('体');
+    });
+
+
   });
 
   describe('saving functions', function() {

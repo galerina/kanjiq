@@ -7,6 +7,10 @@ angular.module('kanjiApp').factory('kanjiDictionary', ['$http', function($http) 
     return {
         getRadicals : function(kanjiText) {
             return kanjis[kanjiText]["radical"];
+        },
+
+        getMeaning : function(kanjiText) {
+            return kanjis[kanjiText]["meaning"];
         }
     };
 }]);
