@@ -6,7 +6,7 @@ angular.module('kanjiApp').factory('wordDictionary', ['$http', 'textUtil', funct
     });
 
     var getJishoResults = function(s, callback) {
-        var apiURL = 'http://jisho.org/api/v1/search/words?keyword=' + s;
+        var apiURL = '/jishoapi/' + encodeURIComponent(s);
 
         $http.get(apiURL).success(function(data) {
             var results = [];
