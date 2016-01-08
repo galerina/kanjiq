@@ -1,6 +1,6 @@
 # Kanjiq - a kanji search tool
 
-[http://kanjiq.org](http://kanjiq.org) - (still under construction)
+[http://kanjiq.org](http://kanjiq.org) - (hosted on Heroku, the search box won't activate until loading is completed)
 
 When learning Japanese, looking up unknown Japanese words and kanji in digital materials is easy using web dictionaries.
 However, out in the wild where Japanese text is on papers, signs, and TV screens, finding the reading and meaning of words you don't understand can be cumbersome. I built KanjiQ to allow a user to search for Kanji using English keywords  ('日'<==>'day'||'sun'). There are already web dictionaries that will find Kanji by keyword but KanjiQ takes things one step further by allowing the user to query a kanji by its parts, each of which is specified by an English meaning. For example, when searching for a complicated kanji like 樹, the queries 'tree measurement' or 'tree beans' will each produce a short list of kanji containing the searched-for one.
@@ -21,7 +21,7 @@ In Heisig's "Remembering the Kanji", kanji and primitives (primitives are roughl
 
 ## Internals
 
-Files are served by a super-light NodeJS server and all kanji queries execute client-side in an AngularJS app structure.
+Files are served by a super-light NodeJS server and all kanji queries execute client-side in an AngularJS app structure. This is the first time I've used Angular so I'm still figuring things out. TODO: I should move data to a database because loading the files causes considerable delay.
 
 ## Acknowledgements
 
