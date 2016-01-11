@@ -3,12 +3,12 @@
 var kanjiApp = angular.module('kanjiApp', []);
 
 kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', function($scope, search, kanjiDictionary) {
-  $scope.saved = ["blah"];
+  $scope.saved = [];
   $scope.findKanji = search.findKanji;
   $scope.findWords = search.findWords;
   $scope.getKanjiMeaning = kanjiDictionary.getMeaning;
-  $scope.wordSearchResults = ["happy"];
-  $scope.kanjiSearchResults = ["日"];
+  $scope.wordSearchResults = [];
+  $scope.kanjiSearchResults = [];
   $scope.updateSearchResults = function(query) {
     search.findKanji($scope.query).then(function(results) {
         console.log("Inside kanji callback");
