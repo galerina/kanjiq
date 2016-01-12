@@ -9,6 +9,7 @@
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script> -->
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/lodash/lodash.min.js"></script>
+    <script src="bower_components/angular-bootstrap-contextmenu/contextMenu.js"></script>
     <script src="js/controllers.js"></script>
     <script src="js/search.js"></script>
     <script src="js/kanjiDictionary.js"></script>
@@ -31,7 +32,7 @@
                 <h3 >Saved ({{saved.length}})</h3>
                 </thead>
                 <tr ng-repeat="e in saved"
-                    ng-click="saved.splice(saved.indexOf(e), 1)">
+                    context-menu="unsaveItemOptions">
                     <td>{{ e }}</td>
                 </tr>
             </table>
@@ -42,7 +43,7 @@
                     <h3 >Radical matches ({{kanjiSearchResults.length}})</h3>
                 </thead>
                 <tr ng-repeat="kanji in kanjiSearchResults"
-                    ng-click="query = saved.push(kanji)">
+                    context-menu="saveItemOptions">
                     <td>{{ kanji }}</td>
                     <!-- <td>{{ getKanjiMeaning(kanji) }}</td> -->
                 </tr>
@@ -55,7 +56,7 @@
                     {{wordSearchResults.length}})</h3>
             </thead>
                 <tr ng-repeat="word in wordSearchResults"
-                    ng-click="saved.push(word)">
+                    context-menu="saveItemOptions">
                     <td>{{ word }}</td>
                 </tr>
             </table>

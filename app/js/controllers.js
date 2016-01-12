@@ -1,6 +1,6 @@
 'use strict';
 
-var kanjiApp = angular.module('kanjiApp', []);
+var kanjiApp = angular.module('kanjiApp', ['ui.bootstrap.contextMenu']);
 
 kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', function($scope, search, kanjiDictionary) {
   $scope.saved = [];
@@ -28,4 +28,15 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', functio
       console.log("Enabling search");
       $scope.searchDisabled = false;
   });
+
+  $scope.saveItemOptions = [
+  ['Save', function($itemScope) {
+      $scope.saved.push($itemScope.kanji || $itemScope.word);
+  }]];
+
+  $scope.unsaveItemOptions = [
+    ['Remove', function($itemScope) {
+      $scope.saved.splice($itemScope.$index, 1);
+    }]
+  ];
 }]);
