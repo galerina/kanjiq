@@ -12,6 +12,8 @@
     "angular-mocks": "~1.4.0",
     "html5-boilerplate": "~5.2.0",
     "lodash": "~3.10.1",
-    "angular-bootstrap-contextmenu": "~0.9.4"
+    "angular-bootstrap-contextmenu": "https://github.com/Templarian/ui.bootstrap.contextMenu.git#f171908695b9ac712b0dfb97714fe615cf2fd337",
+    "jquery": "~2.2.0",
+    "bootstrap": "~3.3.6"
   }
 }

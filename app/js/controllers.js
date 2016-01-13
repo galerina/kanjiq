@@ -3,7 +3,12 @@
 var kanjiApp = angular.module('kanjiApp', ['ui.bootstrap.contextMenu']);
 
 kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', function($scope, search, kanjiDictionary) {
-  $scope.saved = [];
+  $scope.savedLists = [ { name: "default",
+                          show: false,
+                          elements : []},
+                        { name: "other",
+                          show: false,
+                          elements : []}];
   $scope.findKanji = search.findKanji;
   $scope.findWords = search.findWords;
   $scope.getKanjiMeaning = kanjiDictionary.getMeaning;
@@ -23,20 +28,66 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', functio
     });
   };
 
+  $scope.addNewSaveList = function(listName) {
+    if (!_.isEmpty(listName)) {
+        $scope.savedLists.push({ name: listName,
+                                 show: false,
+                                 elements: []});
+        $scope.newListName = "";
+    }
+  }
+
   $scope.searchDisabled = true;
   search.onReady(function() {
       console.log("Enabling search");
       $scope.searchDisabled = false;
   });
 
-  $scope.saveItemOptions = [
-  ['Save', function($itemScope) {
-      $scope.saved.push($itemScope.kanji || $itemScope.word);
-  }]];
+  var getSaveItemOptions = function() {
+      return [
+        [function() { return 'Save to...'},
+        null,
+        (function() {
+            return $scope.savedLists.map(function(savedList) {
+                return [
+                    savedList.name,
+                    function($itemScope) {
+                        savedList.elements.push($itemScope.kanji || $itemScope.word);
+                    }
+                ];
+            });
+        }())]
+        ];
+  };
 
-  $scope.unsaveItemOptions = [
-    ['Remove', function($itemScope) {
-      $scope.saved.splice($itemScope.$index, 1);
-    }]
+
+  // Initialize the context menu options and update when a save list is added or removed.
+  $scope.saveItemOptions = getSaveItemOptions();
+  $scope.$watch(
+    'savedLists.length',
+    function(newValue, oldValue) {
+        console.log("Changed function");
+        if (newValue !== oldValue) {
+            $scope.saveItemOptions = getSaveItemOptions();
+        }
+    }
+  );
+
+
+  $scope.removeListOptions = [
+    [
+    'Remove list',
+    function($itemScope) {
+        $scope.savedLists.splice($itemScope.$index, 1);
+    }
+    ]
+  ];
+
+  $scope.removeItemOptions = [
+    "Remove",
+    function($itemScope,$event) {
+        console.log($itemScope);
+        console.log($event);
+    }
   ];
 }]);

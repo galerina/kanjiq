@@ -3,10 +3,11 @@
 <head>
     <meta charset="utf-8">
     <title>Kanji Search</title>
-    <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/superhero/bootstrap.min.css" rel="stylesheet">
-    <!-- <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css"> -->
+    <!-- <link href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/superhero/bootstrap.min.css" rel="stylesheet"> -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css">
     <link rel="stylesheet" href="css/app.css">
     <!-- <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.min.js"></script> -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/angular/angular.js"></script>
     <script src="bower_components/lodash/lodash.min.js"></script>
     <script src="bower_components/angular-bootstrap-contextmenu/contextMenu.js"></script>
@@ -24,18 +25,28 @@
         <div class="col-md-2">
             <!--Sidebar content-->
 
-            Search: <input ng-model="query" ng-change="updateSearchResults(query)" ng-model-options="{ debounce: 250 }"
-                           ng-disabled="searchDisabled">
-
-            <table class="kanji table table-hover">
-                <thead>
-                <h3 >Saved ({{saved.length}})</h3>
-                </thead>
-                <tr ng-repeat="e in saved"
-                    context-menu="unsaveItemOptions">
-                    <td>{{ e }}</td>
-                </tr>
-            </table>
+            Search: <input ng-model="query" ng-change="updateSearchResults(query)" ng-model-options="{ debounce: 250 }">
+            <div class="save-list">
+                <h4>Save Lists</h4>
+                <div class="save-list-items" ng-repeat="savedList in savedLists">
+                    <button class="btn btn-block"
+                            ng-click="savedList.show = (savedList.elements.length ? !savedList.show : savedList.show)"
+                            context-menu="removeListOptions">
+                        {{savedList.name}} {{savedList.show ? "" : "("+savedList.elements.length+")"}}
+                    </button>
+                    <table class="table table-hover kanji" ng-show="savedList.show && savedList.elements.length">
+                        <tr ng-repeat="element in savedList.elements"
+                                context-menu="removeItemOptions" disabled="true">
+                            <td>{{element}}</td>
+                        </tr>
+                    </table>
+                </div>
+                <div>
+                    <input type="text" class="input-new-list" ng-model="newListName">
+                    <button class="glyphicon glyphicon-plus btn-new-list btn btn-link btn-small"
+                            ng-click="addNewSaveList(newListName)"></button>
+                </div>
+            </div>
         </div>
         <div class="col-md-3"  ng-show="query && kanjiSearchResults.length">
             <table class="kanji table table-hover">
