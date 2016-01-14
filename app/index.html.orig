@@ -16,7 +16,7 @@
     <script src="js/kanjiDictionary.js"></script>
     <script src="js/wordDictionary.js"></script>
     <script src="js/textUtil.js"></script>
-    <script src="js/savedDb.js"></script>
+    <script src="js/myEnter.js"></script>
     <!--<script src="js/filters.js"></script>-->
 </head>
 <body ng-controller="KanjiCtrl">
@@ -26,10 +26,11 @@
         <div class="col-md-2">
             <!--Sidebar content-->
 
+<<<<<<< HEAD
             Search: <input ng-model="query" ng-change="updateSearchResults(query)" ng-model-options="{ debounce: 250 }">
             <div class="save-list">
                 <h4>Save Lists</h4>
-                <div class="save-list-items" ng-repeat="savedList in savedLists" ng-init="savedListIndex = $index">
+                <div class="save-list-items" ng-repeat="savedList in savedLists">
                     <button class="btn btn-block"
                             ng-click="savedList.show = (savedList.elements.length ? !savedList.show : savedList.show)"
                             context-menu="removeListOptions">
@@ -37,7 +38,7 @@
                     </button>
                     <table class="table table-hover kanji" ng-show="savedList.show && savedList.elements.length">
                         <tr ng-repeat="element in savedList.elements"
-                                context-menu="removeItemOptions" disabled="true" ng-init="elementIndex = $index">
+                                context-menu="removeItemOptions" disabled="true">
                             <td>{{element}}</td>
                         </tr>
                     </table>
@@ -48,6 +49,20 @@
                             ng-click="addNewSaveList(newListName)"></button>
                 </div>
             </div>
+=======
+            Search: <input ng-model="query" ng-change="updateKanjiSearchResults(query)" ng-model-options="{ debounce: 250 }"
+                           ng-disabled="searchDisabled" my-enter="updateWordSearchResults(query)">
+
+            <table class="kanji table table-hover">
+                <thead>
+                <h3 >Saved ({{saved.length}})</h3>
+                </thead>
+                <tr ng-repeat="e in saved"
+                    ng-click="saved.splice(saved.indexOf(e), 1)">
+                    <td>{{ e }}</td>
+                </tr>
+            </table>
+>>>>>>> db
         </div>
         <div class="col-md-3"  ng-show="query && kanjiSearchResults.length">
             <table class="kanji table table-hover">

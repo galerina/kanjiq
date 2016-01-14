@@ -2,34 +2,35 @@
 
 var kanjiApp = angular.module('kanjiApp', ['ui.bootstrap.contextMenu']);
 
-kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', 'saveListDb', '$http', function(
-                                  $scope, search, kanjiDictionary, saveListDb, $http) {
-  saveListDb.getSaveLists().then(function(data) {
-    data.forEach(function(saveList) {
-        saveList.show = false;
-    });
-    $scope.savedLists = data;
-    $scope.saveItemOptions = getSaveItemOptions();
-  });
-
-  /*
+kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', function($scope, search, kanjiDictionary) {
+<<<<<<< HEAD
   $scope.savedLists = [ { name: "default",
                           show: false,
                           elements : []},
                         { name: "other",
                           show: false,
                           elements : []}];
-                          */
+=======
+  $scope.saved = [];
+>>>>>>> db
   $scope.findKanji = search.findKanji;
   $scope.findWords = search.findWords;
   $scope.getKanjiMeaning = kanjiDictionary.getMeaning;
   $scope.wordSearchResults = [];
   $scope.kanjiSearchResults = [];
+<<<<<<< HEAD
   $scope.updateSearchResults = function(query) {
+=======
+  $scope.updateKanjiSearchResults = function(query) {
+    console.log("Kanji Q:" + query);
+>>>>>>> db
     search.findKanji($scope.query).then(function(results) {
         $scope.kanjiSearchResults = results;
     });
+  }
 
+  $scope.updateWordSearchResults = function(query) {
+    console.log("Word Q:" + query);
     search.findWords($scope.query).then(function(results) {
         $scope.wordSearchResults = results;
     });
@@ -37,16 +38,16 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', 'saveLi
 
   $scope.addNewSaveList = function(listName) {
     if (!_.isEmpty(listName)) {
-
-        saveListDb.createSavedList(listName).then(function(data) {
-            $scope.savedLists.push(data);
-            $scope.newListName = "";
-        });
+        $scope.savedLists.push({ name: listName,
+                                 show: false,
+                                 elements: []});
+        $scope.newListName = "";
     }
   }
 
   $scope.searchDisabled = true;
   search.onReady(function() {
+      console.log("Enabling search");
       $scope.searchDisabled = false;
   });
 
@@ -59,10 +60,7 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', 'saveLi
                 return [
                     savedList.name,
                     function($itemScope) {
-                        var element = ($itemScope.kanji || $itemScope.word);
-                        saveListDb.addListElement(savedList, element).then(function(data) {
-                            savedList.elements.push(element);
-                        })
+                        savedList.elements.push($itemScope.kanji || $itemScope.word);
                     }
                 ];
             });
@@ -72,9 +70,11 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', 'saveLi
 
 
   // Initialize the context menu options and update when a save list is added or removed.
+  $scope.saveItemOptions = getSaveItemOptions();
   $scope.$watch(
     'savedLists.length',
     function(newValue, oldValue) {
+        console.log("Changed function");
         if (newValue !== oldValue) {
             $scope.saveItemOptions = getSaveItemOptions();
         }
@@ -86,22 +86,16 @@ kanjiApp.controller('KanjiCtrl', ['$scope', 'search', 'kanjiDictionary', 'saveLi
     [
     'Remove list',
     function($itemScope) {
-        saveListDb.deleteSavedList($scope.savedLists[$itemScope.$index]).then(function(data) {
-            $scope.savedLists.splice($itemScope.savedListIndex, 1);
-        });
+        $scope.savedLists.splice($itemScope.$index, 1);
     }
     ]
   ];
 
   $scope.removeItemOptions = [
-  [
     "Remove",
     function($itemScope,$event) {
-        var savedList = $scope.savedLists[$itemScope.savedListIndex];
-        saveListDb.deleteListElement(savedList, savedList.elements[$itemScope.elementIndex]).then(function(data) {
-            $scope.savedLists[$itemScope.savedListIndex].elements.splice($itemScope.elementIndex, 1);
-        });
+        console.log($itemScope);
+        console.log($event);
     }
-  ]
   ];
 }]);
